@@ -21,10 +21,15 @@ if($currentplan -like "*9a20c019-ced8-4383-9912-e20211e86c59*") {
     else {Write-Host -ForegroundColor DarkRed  ERROR: Power Plan could not be applied}
 
 #Edit Manufacturer Information
+cmd.exe /c reg.exe ADD HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\OEMInformation /v "Manufacturer" /t REG_SZ /d "Ingenieurbuero Kottmann" /f
+cmd.exe /c reg.exe ADD HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\OEMInformation /v "SupportHours" /t REG_SZ /d "Mo-Do 09:00-18:00Uhr" /f
+cmd.exe /c reg.exe ADD HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\OEMInformation /v "SupportPhone" /t REG_SZ /d "0711 - 79 43 120" /f
+cmd.exe /c reg.exe ADD HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\OEMInformation /v "SupportURL" /t REG_SZ /d "http://www.ib-kottmann.de/" /f
+
 
 
 #Programme installieren
-winget install -e --id Lenovo.SystemUpdate
+#winget install -e --id Lenovo.SystemUpdate
 winget install -e --id 7zip.7zip
 winget install -e --id Adobe.Acrobat.Reader.64-bit
 winget install -e --id AdoptOpenJDK.OpenJDK.11
@@ -37,4 +42,13 @@ winget install -e --id VideoLAN.VLC
 
 
 
-$manufacturer = Get-WmiObject win32_baseboard | Format-List Manufacturer
+cmd.exe /c echo Clear "Recent Files"
+cmd.exe /c del /F /Q %APPDATA%\Microsoft\Windows\Recent\*
+cmd.exe /c del /F /Q %APPDATA%\Microsoft\Windows\Recent\AutomaticDestinations\*
+cmd.exe /c del /F /Q %APPDATA%\Microsoft\Windows\Recent\CustomDestinations\*
+
+
+#$manufacturer = Get-WmiObject win32_baseboard | Format-List Manufacturer
+
+#TODO
+#Popups with checkmarks to select Programs to be installed
