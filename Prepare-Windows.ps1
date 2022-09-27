@@ -6,7 +6,7 @@ Set-Itemproperty -path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies
 #
 
 #Copy Power Plan to %temp% 
-Copy-Item -Path ".\data\optimal.pow" -Destination "%temp%\optimal.pow"
+Copy-Item -Path ".\data\optimal.pow" -Destination %temp%\optimal.pow
 
 #Import Power Plan from %temp%
 powercfg -import %temp%\optimal.pow 9a20c019-ced8-4383-9912-e20211e86c59
@@ -29,6 +29,11 @@ cmd.exe /c reg.exe ADD HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\OEMInforma
 
 
 #Programme installieren
+
+#check if winget is installed 
+
+
+
 #winget install -e --id Lenovo.SystemUpdate
 winget install -e --id 7zip.7zip
 winget install -e --id Adobe.Acrobat.Reader.64-bit
@@ -42,10 +47,12 @@ winget install -e --id VideoLAN.VLC
 
 
 
-cmd.exe /c echo Clear "Recent Files"
+#Clear "Recent Files"
 cmd.exe /c del /F /Q %APPDATA%\Microsoft\Windows\Recent\*
 cmd.exe /c del /F /Q %APPDATA%\Microsoft\Windows\Recent\AutomaticDestinations\*
 cmd.exe /c del /F /Q %APPDATA%\Microsoft\Windows\Recent\CustomDestinations\*
+
+#Windows Updates
 
 
 #$manufacturer = Get-WmiObject win32_baseboard | Format-List Manufacturer
