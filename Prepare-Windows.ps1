@@ -1,9 +1,31 @@
+#Get PC Information
+#Check if current device is a Laptop or Desktop (Laptop / Mobile = 2, Desktop = 1)
+$HardwareType = (Get-CimInstance -Class Win32_ComputerSystem -Property PCSystemType).PCSystemType
+
+#Get Manufacturer 
+$HardwareManufacturer = (Get-CimInstance -Class Win32_ComputerSystem -Property Manufacturer).Manufacturer
+
+#Get Windows Version (Looks like 'Microsoft Windows 10 Pro')
+$WindowsVersion = (Get-WmiObject -class Win32_OperatingSystem).Caption
+
+
+### List all collected Inforation ###
+Write-Host "PC Information: `n"
+
+Write-Host "Hardware Type: " $HardwareType 
+Write-Host "Manufacturer: " $HardwareManufacturer
+Write-Host "Windows Version: " $WindowsVersion
+
+
+
 #disable LUA
 Set-Itemproperty -path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' -Name 'EnableLUA' -value '0'
 
 #
 #----Powerplan, if Laptop----
 #
+
+if ($HardwareType = 2){
 
 #Copy Power Plan to %temp% 
 Copy-Item -Path ".\data\optimal.pow" -Destination %temp%\optimal.pow
@@ -19,6 +41,23 @@ $currentplan = powercfg /GetActiveScheme
 if($currentplan -like "*9a20c019-ced8-4383-9912-e20211e86c59*") {
     Remove-Item -Path "%temp%\optimal.pow"}
     else {Write-Host -ForegroundColor DarkRed  ERROR: Power Plan could not be applied}
+}
+
+
+#################
+
+
+#####       Run if Windows 10      #####
+
+
+########################################
+
+
+
+#####       Run if Windows 11      ##### 
+
+
+########################################
 
 #Edit Manufacturer Information
 cmd.exe /c reg.exe ADD HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\OEMInformation /v "Manufacturer" /t REG_SZ /d "Ingenieurbuero Kottmann" /f
@@ -33,8 +72,9 @@ cmd.exe /c reg.exe ADD HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\OEMInforma
 #check if winget is installed 
 
 
-
-#winget install -e --id Lenovo.SystemUpdate
+if (HardwareManufacturer -like "LENOVO"){
+    winget install -e --id Lenovo.SystemUpdate
+}
 winget install -e --id 7zip.7zip
 winget install -e --id Adobe.Acrobat.Reader.64-bit
 winget install -e --id AdoptOpenJDK.OpenJDK.11
@@ -55,7 +95,12 @@ cmd.exe /c del /F /Q %APPDATA%\Microsoft\Windows\Recent\CustomDestinations\*
 #Windows Updates
 
 
-#$manufacturer = Get-WmiObject win32_baseboard | Format-List Manufacturer
-
 #TODO
 #Popups with checkmarks to select Programs to be installed
+#Run Lenovo System Update
+#Remove Windows Crap (Decrapifier)
+#Check if run as Admin
+#Check if winget is installed, if not install
+#List all information about PC in the beginning (ask if correct)
+#Check if windows 10 or 11
+#Windows Updates
