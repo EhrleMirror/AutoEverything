@@ -8,6 +8,30 @@ $HardwareManufacturer = (Get-CimInstance -Class Win32_ComputerSystem -Property M
 #Get Windows Version (Looks like 'Microsoft Windows 10 Pro')
 $WindowsVersion = (Get-WmiObject -class Win32_OperatingSystem).Caption
 
+#Check if winget is installed
+
+#Get newest Winget version
+
+
+try {$wingetCurrent = winget -v
+    Write-Host "Winget Version: "$wingetCurrent
+}
+catch {
+    $title    = 'Winget not installed'
+    $question = 'Winget is not yet installed. Do you want to install it now? '
+    $choices  = '&Yes', '&No'
+    
+    $decision = $Host.UI.PromptForChoice($title, $question, $choices, 0)
+    if ($decision -eq 0) {
+        Write-Host 'confirmed'
+
+       
+
+        Add-AppxPackage “C:\Temp\WinGet.msixbundle” 
+    } else {
+        Write-Host 'cancelled'
+    }
+}
 
 ### List all collected Inforation ###
 Write-Host "PC Information: `n"
@@ -16,15 +40,10 @@ Write-Host "Hardware Type: " $HardwareType
 Write-Host "Manufacturer: " $HardwareManufacturer
 Write-Host "Windows Version: " $WindowsVersion
 
-
-
 #disable LUA
 Set-Itemproperty -path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' -Name 'EnableLUA' -value '0'
 
-#
-#----Powerplan, if Laptop----
-#
-
+#####       Change Power Plan if latop       #####
 if ($HardwareType = 2){
 
 #Copy Power Plan to %temp% 
@@ -42,19 +61,23 @@ if($currentplan -like "*9a20c019-ced8-4383-9912-e20211e86c59*") {
     Remove-Item -Path "%temp%\optimal.pow"}
     else {Write-Host -ForegroundColor DarkRed  ERROR: Power Plan could not be applied}
 }
-
-
-#################
-
+##################################################
 
 #####       Run if Windows 10      #####
 
+if ($WindowsVersion -Match "10"){
+    Write-Host This is Windows 10
+}
 
 ########################################
 
 
 
 #####       Run if Windows 11      ##### 
+
+if ($WindowsVersion -Match "11"){
+    Write-Host This is Windows 11
+}
 
 
 ########################################
@@ -102,5 +125,4 @@ cmd.exe /c del /F /Q %APPDATA%\Microsoft\Windows\Recent\CustomDestinations\*
 #Check if run as Admin
 #Check if winget is installed, if not install
 #List all information about PC in the beginning (ask if correct)
-#Check if windows 10 or 11
 #Windows Updates
