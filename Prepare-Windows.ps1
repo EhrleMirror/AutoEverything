@@ -9,13 +9,10 @@ $HardwareManufacturer = (Get-CimInstance -Class Win32_ComputerSystem -Property M
 $WindowsVersion = (Get-WmiObject -class Win32_OperatingSystem).Caption
 
 #Check if winget is installed
-
-#Get newest Winget version
-
-
 try {$wingetCurrent = winget -v
     Write-Host "Winget Version: "$wingetCurrent
 }
+#If not installed ask if it should be downloaded & installed
 catch {
     $title    = 'Winget not installed'
     $question = 'Winget is not yet installed. Do you want to install it now? '
@@ -25,9 +22,9 @@ catch {
     if ($decision -eq 0) {
         Write-Host 'confirmed'
 
-       
-
-        Add-AppxPackage “C:\Temp\WinGet.msixbundle” 
+       #Temporary, this needs to be for recent version always
+        Invoke-WebRequest -Uri "https://github.com/microsoft/winget-cli/releases/download/v1.4.2161-preview/Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle" -OutFile %TEMP%"\WinPrep\WinGet.msixbundle"
+        Add-AppxPackage “%TEMP%\WinPrep\WinGet.msixbundle” 
     } else {
         Write-Host 'cancelled'
     }
@@ -126,3 +123,4 @@ cmd.exe /c del /F /Q %APPDATA%\Microsoft\Windows\Recent\CustomDestinations\*
 #Check if winget is installed, if not install
 #List all information about PC in the beginning (ask if correct)
 #Windows Updates
+#Always get newest verion of winget
