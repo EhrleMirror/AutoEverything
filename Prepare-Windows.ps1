@@ -1,4 +1,27 @@
-#Get PC Information
+function Install-Winget {
+    try {
+        $WingetVersion = winget -v
+        }
+    #If not installed ask if it should be downloaded & installed
+    catch {
+        $title    = 'Winget not installed'
+        $question = 'Winget is not yet installed. Do you want to install it now? '
+        $choices  = '&Yes', '&No'
+        
+        $decision = $Host.UI.PromptForChoice($title, $question, $choices, 0)
+        if ($decision -eq 0) {   
+            #Create Folder inside %TEMP% to dowload to 
+            New-Item -ItemType Directory -Force -Path $env:TEMP\WinPrep
+            #Download the newest version and put it in the Folder inside %TEMP%
+            Invoke-WebRequest -Uri "https://github.com/microsoft/winget-cli/releases/latest/download/Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle" -OutFile "$env:TEMP\WinPrep\WinGet.msixbundle"
+            Add-AppxPackage “$env:TEMP\WinPrep\WinGet.msixbundle” 
+            $WingetVersion = winget -v
+        } else {
+            Write-Host 'Installation cancelled by User' -ForegroundColor Red
+            $WingetVersion = "NOT INSTALLED"
+        }
+    }
+}
 #Check if current device is a Laptop or Desktop (Laptop / Mobile = 2, Desktop = 1)
 $HardwareType = (Get-CimInstance -Class Win32_ComputerSystem -Property PCSystemType).PCSystemType
 
@@ -9,26 +32,7 @@ $HardwareManufacturer = (Get-CimInstance -Class Win32_ComputerSystem -Property M
 $WindowsVersion = (Get-WmiObject -class Win32_OperatingSystem).Caption
 
 #Check if winget is installed
-try {$wingetCurrent = winget -v
-    Write-Host "Winget Version: "$wingetCurrent
-}
-#If not installed ask if it should be downloaded & installed
-catch {
-    $title    = 'Winget not installed'
-    $question = 'Winget is not yet installed. Do you want to install it now? '
-    $choices  = '&Yes', '&No'
-    
-    $decision = $Host.UI.PromptForChoice($title, $question, $choices, 0)
-    if ($decision -eq 0) {
-        Write-Host 'confirmed'
-
-       #Temporary, this needs to be for recent version always
-        Invoke-WebRequest -Uri "https://github.com/microsoft/winget-cli/releases/download/v1.4.2161-preview/Microsoft.DesktopAppInstaller_8wekyb3d8bbwe.msixbundle" -OutFile %TEMP%"\WinPrep\WinGet.msixbundle"
-        Add-AppxPackage “%TEMP%\WinPrep\WinGet.msixbundle” 
-    } else {
-        Write-Host 'cancelled'
-    }
-}
+Install-Winget
 
 ### List all collected Inforation ###
 Write-Host "PC Information: `n"
@@ -36,6 +40,7 @@ Write-Host "PC Information: `n"
 Write-Host "Hardware Type: " $HardwareType 
 Write-Host "Manufacturer: " $HardwareManufacturer
 Write-Host "Windows Version: " $WindowsVersion
+Write-Host "Winget Version: " $WingetVersion
 
 #disable LUA
 Set-Itemproperty -path 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System' -Name 'EnableLUA' -value '0'
@@ -91,8 +96,12 @@ cmd.exe /c reg.exe ADD HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\OEMInforma
 
 #check if winget is installed 
 
-
-if (HardwareManufacturer -like "LENOVO"){
+if ($IsWingetInstalled -eq $false) {
+    Write-Host "Winget is not installed, no Programs will be installed"
+}
+else 
+{
+if ($HardwareManufacturer -like "LENOVO"){
     winget install -e --id Lenovo.SystemUpdate
 }
 winget install -e --id 7zip.7zip
@@ -104,6 +113,7 @@ winget install -e --id Google.Chrome
 winget install -e --id IrfanSkiljan.IrfanView
 winget install -e --id Notepad++.Notepad++
 winget install -e --id VideoLAN.VLC
+}
 
 
 
